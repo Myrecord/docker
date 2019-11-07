@@ -10,11 +10,11 @@
   
    [5. 数据如何持久化？](https://github.com/Myrecord/Docker/blob/master/README.md)
   
-   [6. Dockerfile是什么？](https://github.com/Myrecord/Docker/blob/master/README.md)
+   [6. docker私有仓库](https://github.com/Myrecord/Docker/blob/master/README.md)
   
-   [7. docker私有仓库](https://github.com/Myrecord/Docker/blob/master/README.md)
+   [7. Dockerfile是什么？](https://github.com/Myrecord/Docker/blob/master/README.md)
   
-   [8. 管理容器资源？](https://github.com/Myrecord/Docker/blob/master/README.md)
+   [8. 管理容器资源](https://github.com/Myrecord/Docker/blob/master/README.md)
   
 
 **二. docker使用**
@@ -52,3 +52,4 @@
 ##### 6. docker私有仓库
 * 仓库是镜像的集合，默认用户从docker hub中获取镜像，但docker官方提供一个本地的私有仓库**docker-registry**，将自制的镜像推送到本地仓库，下次获取镜像可从本地直接下载。
 * [harbor](https://github.com/goharbor/harbor)是通过web界面管理docker镜像并且还包含用户权限设置，需要安装docker-commpose
+##### 7. Dokerfile是什么
