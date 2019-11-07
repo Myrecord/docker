@@ -14,12 +14,12 @@
   
    [7. docker私有仓库](https://github.com/Myrecord/Docker/blob/master/README.md)
   
-   [8. 如何限制容器默认启动资源？](https://github.com/Myrecord/Docker/blob/master/README.md)
+   [8. 管理容器资源？](https://github.com/Myrecord/Docker/blob/master/README.md)
   
 
 **二. docker使用**
     
-  [1.基础命令](https://github.com/Myrecord/Docker/blob/master/README.md)
+  [1. 基础命令](https://github.com/Myrecord/Docker/blob/master/README.md)
   
   
 ----
@@ -48,3 +48,8 @@
 ##### 5. 数据如何持久化？
 * 很多有状态的服务需要保存数据比如Mysql、Redis，默认容器产生的数据会随着容器删除而被删除，docker中提供对数据持久保存的方式，容器中的文件或目录与宿主机中的目录文件进行绑定，在宿主机对数据修改或者删除时容器也会随之而改变。
 * 同时多个容器可以同时共享挂载一个数据盘或复制前一个容器的数据盘
+##### 6. Dockerfile是什么？
+* Dockerfile是docker重要的功能，它是用来定制镜像，在RootFS之上每一层
+##### 7. docker私有仓库
+* 仓库是镜像的集合，默认用户从docker hub中获取镜像，但docker官方提供一个本地的私有仓库**docker-registry**，将自制的镜像推送到本地仓库，下次获取镜像可从本地直接下载。
+* [harbor](https://github.com/goharbor/harbor)是通过web界面管理docker镜像
