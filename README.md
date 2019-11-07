@@ -32,7 +32,7 @@
 * Linux系统内核已经实现的容器技术，早期**LXC(Linux Container)** 是用来创建管理容器工具。Docker是LXC的二次封装版，docker的出世大大简化了容器使用的难度并做到一次构建到处运行，保证环境的统一提高效率，但Docker自身对与分发、管理容器、运行顺序还是有一定缺陷，不得不借助于编排工具，目前随着Docker发展，Docker容器引擎从libcontainer变更为Runc。
 ##### 2. docker架构如何工作？
 ![2.jpg](https://github.com/Myrecord/Docker/blob/master/2.jpg)
-* Docker是C/S架构模式运行,支持三种模式监听:ipv4、ipv6、Unixsocket文件(默认),Docker在后台启动Docker daemon守护进程监听本地的socket文件,Docker client执行命令启动容器时Docker server默认使用https从仓库中获取，如果本地不存在则从dokcer hub中获取镜像文件,镜像文件是分层构建,底层的镜像文件为只读模式,最终将多层镜像文件汇总成一个读写层提供给容器运行并存放到本地，一个仓库只包含一个镜像但可以是多个不同版本,例如：&lt;仓库名&gt;:&lt;标签&gt;，或者&lt;仓库名称&gt;/&lt;标签&gt;.
+* Docker是C/S架构模式运行,支持三种模式监听:ipv4、ipv6、Unix socket文件(默认),Docker在后台启动Docker daemon守护进程监听本地的socket文件,Docker client执行命令启动容器时Docker server默认使用https从仓库中获取，如果本地不存在则从dokcer hub中获取镜像文件,镜像文件是分层构建,底层的镜像文件为只读模式,最终将多层镜像文件汇总成一个读写层提供给容器运行并存放到本地，一个仓库只包含一个镜像但可以是多个不同版本,例如：&lt;仓库名&gt;:&lt;标签&gt;，或者&lt;仓库名称&gt;/&lt;标签&gt;.
 ##### 3. Docker镜像如何实现？
 ![3.jpg](https://github.com/Myrecord/Docker/blob/master/3.jpg)
 * 镜像其实就是一个包含完整的操作系统，在最低层为bootfs、其次rootfs(系统)都为只读模式,一个镜像必须包含基础操作系统，我们构建镜像过程中，实际上是在前两层之上制作，每层之间是独立的，例如：在第三层添加emacs并在第四层添加apache，第四层中并不包含amecs，最后其实是通过**联合挂载**的方式将所有层整合并提供一个读写层(最上层)容器.
