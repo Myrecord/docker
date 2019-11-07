@@ -7,11 +7,14 @@
 * 相比虚拟机容器隔离并不是很彻底，因为容器之间共享一个内核空间、硬件资源。假设一个容器使用的CPU为100%就会影响其他的容器。但Linux内核提供对资源限制分配的功能叫做Cgroups。它可以对系统资源进行限制分配、比如一个容器可以使用多少CPU核心、多少内存等。
 * Linux系统内核已经实现的容器技术，早期**LXC(Linux Container)** 是用来创建管理容器工具。Docker是LXC的二次封装版，docker的出世大大简化了容器使用的难度并做到一次构建到处运行，保证环境的统一提高效率，但Docker自身对与分发、管理容器、运行顺序还是有一定缺陷，不得不借助于编排工具，目前随着Docker发展，Docker容器引擎从libcontainer变更为Runc。
 ##### 2. docker架构如何工作？
+![2.jpg](https://github.com/Myrecord/Docker/blob/master/2.jpg)
 * Docker是C/S架构模式运行,支持三种模式监听:ipv4、ipv6、Unixsocket文件(默认),Docker在后台启动Docker daemon守护进程监听本地的socket文件,Docker client执行命令启动容器时Docker server默认使用https从仓库中获取，如果本地不存在则从dokcer hub中获取镜像文件,镜像文件是分层构建,底层的镜像文件为只读模式,最终将多层镜像文件汇总成一个读写层提供给容器运行并存放到本地，一个仓库只包含一个镜像但可以是多个不同版本,例如：&lt;仓库名&gt;:&lt;标签&gt;，或者&lt;仓库名称&gt;/&lt;标签&gt;.
 ##### 3. Docker镜像如何实现？
+![3.jpg](https://github.com/Myrecord/Docker/blob/master/3.jpg)
 * 镜像其实就是一个包含完整的操作系统，在最低层为bootfs、其次rootfs(系统)都为只读模式,一个镜像必须包含基础操作系统，我们构建镜像过程中，实际上是在前两层之上制作，每层之间是独立的，例如：在第三层添加emacs并在第四层添加apache，第四层中并不包含amecs，最后其实是通过**联合挂载**的方式将所有层整合并提供一个读写层(最上层)容器.
 * 早期docker版本使用的**Aufs(高级多层统一文件系统)** 新版本中docker默认使用文件系统为**overla2(联合挂载)** 层级可以复用、追加，假设同时有两个版本的nginx镜像底层会有相同依赖的层级不需要创建新的层级，也可以添加新的功能，但如果删除其中一个nginx镜像，并不会删除依赖的层级。
 ##### 4. docker中的网络模型
+![4.jpg](https://github.com/Myrecord/Docker/blob/master/4.jpg)
 * docker支持多种网络模式使用docker info命令可以查看，默认有三种bridge、host、none如果不指定，使用bridge作为默认的网络，在安装完docker后会创建一个docker0的网桥，docker0不仅是一个虚拟网卡在容器内部也充当交换机。容器创建后，会自动创建**一对网卡**，一端在容器内部，一端在物理机中，并且生成在物理机中的一端虚拟网卡接口都被插在docker0网桥中，通过使用brctl show命令查看。
 * bridge：容器之间通信网络接口都连接到docker0网桥中，要想外部访问容器，就需要进行DNAT模式，docker会在iptables中自动创建转发规则，这种模型显然降低带宽的质量，但在测试环境比较适合。
 * host：共享宿主机的网络，容器之间访问将不在使用docker0，而是与宿主机使用
