@@ -1,10 +1,10 @@
 **一. docker概念**
 
   [1. 容器与虚拟机有什么区别?](https://github.com/Myrecord/Docker/blob/master/README.md)
-  ```html
-      <font color=#00ffff size=72>color=#00ffff</font>
-  
-  <font color=gray size=72>color=gray</font>
+
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `#f03c15`
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `#c5f015`
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `#1589F0`
   
   2. docker架构如何工作？
   3. docker镜像如何实现？
