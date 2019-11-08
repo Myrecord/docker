@@ -53,3 +53,4 @@
 * 仓库是镜像的集合，默认用户从docker hub中获取镜像，但docker官方提供一个本地的私有仓库**docker-registry**，将自制的镜像推送到本地仓库，下次获取镜像可从本地直接下载。
 * [harbor](https://github.com/goharbor/harbor)是通过web界面管理docker镜像并且还包含用户权限设置，需要安装docker-commpose
 ##### 7. Dokerfile是什么
+![6.png](https://github.com/Myrecord/Docker/blob/master/6.png)
