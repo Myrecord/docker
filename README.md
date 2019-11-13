@@ -19,7 +19,7 @@
 
 **二. docker使用**
     
-  [1. 基础命令](https://github.com/Myrecord/Docker/blob/master/README.md)
+  [1. 常用命令](https://github.com/Myrecord/Docker/blob/master/README.md)
   
   
 ----
@@ -52,5 +52,10 @@
 ##### 6. docker私有仓库
 * 仓库是镜像的集合，默认用户从docker hub中获取镜像，但docker官方提供一个本地的私有仓库**docker-registry**，将自制的镜像推送到本地仓库，下次获取镜像可从本地直接下载。
 * [harbor](https://github.com/goharbor/harbor)是通过web界面管理docker镜像并且还包含用户权限设置，需要安装docker-commpose
-##### 7. Dokerfile是什么
+##### 7. Dokerfile是什么？
 ![6.png](https://github.com/Myrecord/Docker/blob/master/6.png)
+* Dockerfile只是一个普通的文本文件，默认并不存在，使用Dockerfile可快速自定义镜像，文件内有许多相关的指令，每个指令都必须是大写。
+* 在Dockerfile中文件开头必须使用**FROM**指定一个基础镜像，镜像是分层构建，每写一层指令就会在合并时多一层，所以编写Dockerfile时将相关内容的层合为一个层，较少镜像的臃肿。
+ ##### 8. 管理容器资源
+* 
+
