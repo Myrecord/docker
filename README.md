@@ -45,6 +45,11 @@
    docker tag nginx:latest test.registry.com/printsmile/nginx:1.10.1
    docker push test.registry.com/printsmile/nginx:1.10.1
 ```
+* 除来私有仓库来存储镜像，docker还提供倒入倒出的方式：
+```
+   docker save nginx:latest -o nginx.tar #倒出镜像
+   docker load -i nginx.tar  #倒出镜像
+```
 
 ##### 五. docker中的网络模型
 ![4.jpg](https://github.com/Myrecord/Docker/blob/master/4.jpg)
