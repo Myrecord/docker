@@ -48,8 +48,8 @@ docker logout   #退出仓库
 * 一个仓库包含不同版本的镜像,例如：`printsmile/nginx:1.10.1`、`printsmile/nginx:1.9` 前面代表仓库名称后面是nginx的版本信息，另外一种方式`test.image.com/printmsile/nginx.:1.10.1`，通过第三方仓库pull，push时需要指定服务器地址，而test.image.com就服务器地址，修改镜像名称推送到私有仓库，通过使用`docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]` 
 例如：
 ```
-   docker tag nginx:latest test.registry.com/printsmile/nginx:1.10.1
-   docker push test.registry.com/printsmile/nginx:1.10.1
+   docker tag nginx:latest test.registry.com/printsmile/nginx:1.10.1 #修改nginx:latest 名称
+   docker push test.registry.com/printsmile/nginx:1.10.1 #推送到私有仓库
 ```
 * 除了私有仓库来存储镜像，docker还提供倒入倒出的方式：
 ```
