@@ -33,7 +33,7 @@
 
 
 ##### 四. 私有仓库
-* 仓库是镜像的集合，docker官方提供一个本地的私有仓库**docker-registry**，实际中工作中很多镜像都需要定制，推送到本地仓库来维护。如果没有ssl认证，修改/etc/docker/daemon.json。[harbor](https://github.com/goharbor/harbor)是通过web界面管理docker镜像并且还包含用户权限设置(体验很ok)。
+* 仓库是镜像的集合，docker官方提供一个本地的私有仓库**docker-registry**，实际中工作中很多镜像都需要定制，推送到本地仓库来维护。如果没有ssl认证，修改/etc/docker/daemon.json。外有还有一些开源的仓库[**harbor**](https://github.com/goharbor/harbor)，harbor通过web界面管理docker镜像并且还包含用户权限设置等。
 ```
 {
   "insecure-registries": ["test.registry.com"] # 取消ssl认证
