@@ -30,15 +30,21 @@
 * 镜像其实就是一个包含完整的操作系统，在最低层为bootfs、其次rootfs(系统)都为只读模式,一个镜像必须包含基础操作系统，我们构建镜像过程中，实际上是在前两层之上制作，每层之间是独立的，例如：在第三层添加emacs并在第四层添加apache，第四层中并不包含amecs，最后其实是通过**联合挂载**的方式将所有层整合并提供一个读写层(最上层)容器.
 
 * 早期docker版本使用的**Aufs(高级多层统一文件系统)** 新版本中docker默认使用文件系统为**overla2(联合挂载)** 层级可以复用、追加，假设同时有两个版本的nginx镜像底层会有相同依赖的层级不需要创建新的层级，也可以添加新的功能，但如果删除其中一个nginx镜像，并不会删除依赖的层级。
-* 获取镜像：
-  `docker pull nginx`
+
 
 ##### 四. 私有仓库
-* 仓库是镜像的集合，docker官方提供一个本地的私有仓库**docker-registry**，实际中工作中很多镜像都需要定制，推送到本地仓库来维护。[harbor](https://github.com/goharbor/harbor)是通过web界面管理docker镜像并且还包含用户权限设置，需要安装docker-commpose
+* 仓库是镜像的集合，docker官方提供一个本地的私有仓库**docker-registry**，实际中工作中很多镜像都需要定制，推送到本地仓库来维护。如果没有ssl认证，修改/etc/docker/daemon.json。
+```
+{
+  "insecure-registries": ["harbor.test.com","registry.cn-shenzhen.aliyuncs.com"] # 取消ssl认证
+{
+```
+
+*[harbor](https://github.com/goharbor/harbor)是通过web界面管理docker镜像并且还包含用户权限设置，需要安装docker-commpose
 
 * 一个仓库包含不同版本的镜像,例如：`printsmile/nginx:1.10.1` 前面代表仓库名称后面是nginx的版本信息，另外一种方式 `test.image.com/printmsile/nginx.:1.10.1`，通过第三方仓库pull，push时需要指定服务器地址，而test.image.com就服务器地址。
 
-##### 四. docker中的网络模型
+##### 五. docker中的网络模型
 ![4.jpg](https://github.com/Myrecord/Docker/blob/master/4.jpg)
 * docker支持多种网络模式使用docker info命令可以查看，默认有三种bridge、host、none如果不指定，使用bridge作为默认的网络，在安装完docker后会创建一个docker0的网桥，docker0不仅是一个虚拟网卡在容器内部也充当交换机。容器创建后，会自动创建**一对网卡**，一端在容器内部，一端在物理机中，并且生成在物理机中的一端虚拟网卡接口都被插在docker0网桥中，通过使用brctl show命令查看。
 * bridge：容器之间通信网络接口都连接到docker0网桥中，要想外部访问容器，就需要进行DNAT模式，docker会在iptables中自动创建转发规则，这种模型显然降低带宽的质量，但在测试环境比较适合。
@@ -46,10 +52,12 @@
 同一个IP地址，在容器内开放的端口相当于开发宿主机的端口
 * none：不设置任何网络模型，如果启动容器不需要网络可指定，容器内部只有一个lo接口。
 * 另外一种网络模型容器之间也可以共享网络，两个容器使用同一个网络命名空间容器通过lo地址可互相访问，但文件系统、主机名称并不共享。
-##### 五. 数据如何持久化？
+
+##### 六. 数据如何持久化？
 ![5.png](https://github.com/Myrecord/Docker/blob/master/5.png)
 * 很多有状态的服务需要保存数据比如Mysql、Redis，默认容器产生的数据会随着容器删除而被删除，docker中提供对数据持久保存的方式，容器中的数据卷可与宿主机中的数据卷进行绑定，在宿主机对数据修改或者删除时容器也会随之而改变，另外容器被删除后数据将会保留。
 * 同时多个容器可以同时共享挂载一个数据盘或复制前一个容器的数据盘
+
 ##### 七. Dokerfile是什么？
 ![6.png](https://github.com/Myrecord/Docker/blob/master/6.png)
 * Dockerfile只是一个普通的文本文件，默认并不存在，使用Dockerfile可快速自定义镜像，文件内有许多相关的指令，每个指令都必须是大写。
