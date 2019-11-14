@@ -33,14 +33,16 @@
 
 
 ##### 四. 私有仓库
-* 仓库是镜像的集合，docker官方提供一个本地的私有仓库**docker-registry**，实际中工作中很多镜像都需要定制，推送到本地仓库来维护。如果没有ssl认证，修改/etc/docker/daemon.json。[harbor](https://github.com/goharbor/harbor)是通过web界面管理docker镜像并且还包含用户权限设置，
+* 仓库是镜像的集合，docker官方提供一个本地的私有仓库**docker-registry**，实际中工作中很多镜像都需要定制，推送到本地仓库来维护。如果没有ssl认证，修改/etc/docker/daemon.json。[harbor](https://github.com/goharbor/harbor)是通过web界面管理docker镜像并且还包含用户权限设置(体验很ok)。
 ```
 {
   "insecure-registries": ["test.registry.com"] # 取消ssl认证
 {
 ```
-
-* 一个仓库包含不同版本的镜像,例如：`printsmile/nginx:1.10.1` 前面代表仓库名称后面是nginx的版本信息，另外一种方式 `test.image.com/printmsile/nginx.:1.10.1`，通过第三方仓库pull，push时需要指定服务器地址，而test.image.com就服务器地址。
+* 一个仓库包含不同版本的镜像,例如：`printsmile/nginx:1.10.1` 前面代表仓库名称后面是nginx的版本信息，另外一种方式`test.image.com/printmsile/nginx.:1.10.1`，通过第三方仓库pull，push时需要指定服务器地址，而test.image.com就服务器地址。，修改镜像名称推送到私有仓库，通过使用`docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]` 例如：
+```docker tag nginx:latest test.registry.com/printsmile/nginx:1.10.1
+   docker push test.registry.com/printsmile/nginx:1.10.1
+```
 
 ##### 五. docker中的网络模型
 ![4.jpg](https://github.com/Myrecord/Docker/blob/master/4.jpg)
