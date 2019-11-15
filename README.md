@@ -27,7 +27,7 @@
 
 ##### 三. 镜像与容器
 ![3.jpg](https://github.com/Myrecord/Docker/blob/master/3.jpg)
-* 镜像:包含完整的操作系统，在最低层为bootfs、其次rootfs(系统)都为只读模式,在此之上每添加一层为可写层，最后通过联合挂载的方式构建一个读写层供容器运行，用户在容器内修改、添加等操作都在最上层完成。早期docker版本使用的**Aufs(高级多层统一文件系统)** 新版本中docker默认使用文件系统为**overla2(联合挂载)** 层级可以复用、追加。
+* 镜像: 包含完整的操作系统，在最低层为bootfs、其次rootfs(系统)都为只读模式,在此之上每添加一层为可写层，最后通过联合挂载的方式构建一个读写层供容器运行，用户在容器内修改、添加等操作都在最上层完成。早期docker版本使用的**Aufs(高级多层统一文件系统)** 新版本中docker默认使用文件系统为**overla2(联合挂载)** 层级可以复用、追加。
 
 * docker中大部分命令都与shell类似，在获取镜像时如果不指定版本，默认则拉去latest版本。
    ```
@@ -35,7 +35,27 @@
    docker images                #查看镜像
    docker image rm nginx:latest #删除镜像
    ```
-* 容器:
+* 容器: 容器就好比进程一样，但不同的是容器有自己独立的命名空间与系统隔离，进程是装载在容器内的。建议一个容器只运行一个进程，而容器内的第一个进程ID应该为应用程序的进程ID(busybox默认的进程是sh，当sh执行后容器就会退出，官方提供的nginx镜像默认在容器内启动第一个ID为nginx的ID)，使用`docker inspect [NAME|ID]`查看容器和镜像的详细信息。
+   ```
+   docker run busybox:latest    #运行busybox容器后因为shell结束容器就会结束
+   docker run -d nginx:latest   #运行nginx容器守护进程为nginx的进程（nginx是在前台执行使用-d参数放入后台） 
+   
+   nginx:
+        "Cmd": [
+                "nginx",                   #nginx容器默认启动的指令
+                "-g",
+                "daemon off;"
+            ]
+   busybox:
+        "Cmd": [
+                "sh"                       #busybox容器默认启动的指令
+            ]     
+   ```
+* 查看容器运行：
+   ```
+   docker ps    #查看正在运行的容器
+   docker ps -a #查看所有容器
+   ```
 
 ##### 四. 私有仓库
 * 仓库是镜像的集合，docker官方提供一个本地的私有仓库**docker-registry**，实际中工作中很多镜像都需要定制，推送到本地仓库来维护。如果没有ssl认证，修改/etc/docker/daemon.json。外有还有一些开源的仓库[**harbor**](https://github.com/goharbor/harbor)，harbor通过web界面管理docker镜像并且还包含用户权限设置、搜索等功能。
