@@ -3,22 +3,24 @@
    [二. docker架构如何工作？](https://github.com/Myrecord/Docker/blob/master/README.md)
   
    [三. 镜像与容器](https://github.com/Myrecord/Docker/blob/master/README.md)
+   
+   [四. 私有仓库](https://github.com/Myrecord/Docker/blob/master/README.md)
+   
+   [五. 数据持久化](https://github.com/Myrecord/Docker/blob/master/README.md)
+   
+   [六. Dockerfile与docker commti](https://github.com/Myrecord/Docker/blob/master/README.md)
   
-   [四. docker中的网络模型](https://github.com/Myrecord/Docker/blob/master/README.md)
-  
-   [五. 数据如何持久化？](https://github.com/Myrecord/Docker/blob/master/README.md)
-  
-   [六. docker私有仓库](https://github.com/Myrecord/Docker/blob/master/README.md)
-  
-   [七. Dockerfile是什么？](https://github.com/Myrecord/Docker/blob/master/README.md)
-  
+   [七. 网络模型](https://github.com/Myrecord/Docker/blob/master/README.md)
+    
    [八. 管理容器资源](https://github.com/Myrecord/Docker/blob/master/README.md)
    
 ----
 ##### 一. 容器与虚拟机有什么区别？
 ![1.jpg](https://github.com/Myrecord/Docker/blob/master/1.jpg)
 * 虚拟机是运行在宿主机操作系统之上，在宿主机操作系统上模拟宿主机的硬件、操作系统、内核用来进行隔离。继承在一台宿主机的多个虚拟机之间，内核、系统、用户空间互相不受影响，哪怕其中一台虚拟机挂掉也不会影响其他虚拟机的运行，可以做到彻底的隔离，但对于资源的开销比较大。
+
 * 容器是在虚拟机的结构中去除虚拟机的内核层(系统)，共享宿主机的硬件资源，在宿主机的操上模拟多个用户空间，给进程提供运行环境，保护进程不被其他进程干扰，所以容器是基于用户空间进行隔离。用户空间如何隔离？每个用户空间中都有独立的UTS(主机名称)、Mount(文件系统)、IPS(通信消息队列)、PID(进程)、USER(用户)、NETWORK(网络)，这6种命名空间统称为**Namespaces**,Linux内核在3.8版本中加入了USER命名空间，所以想要使用Docker内核最低3.10
+
 * 相比虚拟机容器隔离并不是很彻底，因为容器之间共享一个内核空间、硬件资源。假设一个容器使用的CPU为100%就会影响其他的容器。但Linux内核提供对资源限制分配的功能叫做Cgroups。它可以对系统资源进行限制分配、比如一个容器可以使用多少CPU核心、多少内存等。
 
 ##### 二. docker架构如何工作？
@@ -27,7 +29,7 @@
 
 ##### 三. 镜像与容器
 ![3.jpg](https://github.com/Myrecord/Docker/blob/master/3.jpg)
-* 镜像: 包含完整的操作系统，在最低层为bootfs、其次rootfs(系统)都为只读模式,在此之上每添加一层为可写层，最后通过联合挂载的方式构建一个读写层供容器运行，用户在容器内修改、添加等操作都在最上层完成。早期docker版本使用的**Aufs(高级多层统一文件系统)** 新版本中docker默认使用文件系统为**overla2(联合挂载)** 层级可以复用、追加。
+* **镜像**: 包含完整的操作系统，在最低层为bootfs、其次rootfs(系统)都为只读模式,在此之上每添加一层为可写层，最后通过联合挂载的方式构建一个读写层供容器运行，用户在容器内修改、添加等操作都在最上层完成。早期docker版本使用的**Aufs(高级多层统一文件系统)** 新版本中docker默认使用文件系统为**overla2(联合挂载)** 层级可以复用、追加。
 
 * docker中大部分命令都与shell类似，在获取镜像时如果不指定版本，默认则拉去latest版本。
    ```
@@ -35,7 +37,9 @@
    docker images                #查看镜像
    docker image rm nginx:latest #删除镜像
    ```
-* 容器: 容器就好比进程一样，但不同的是容器有自己独立的命名空间与系统隔离，进程是装载在容器内的。官方建议一个容器只运行一个进程，而容器内的第一个进程ID应该为应用程序的进程ID(busybox默认的进程是sh，当sh执行后容器就会退出，官方提供的nginx镜像默认在容器内启动第一个ID为nginx的ID)，使用`docker inspect [NAME|ID]`查看容器和镜像的详细信息。
+* docker对镜像或容器操作使用名称或者**ID前4位**即可。
+
+* **容器**: 容器就好比进程一样，但不同的是容器有自己独立的命名空间与系统隔离，应用程序是装载在容器内的。官方建议一个容器只运行一个进程，而容器内的第一个进程ID应该为应用程序的进程ID(busybox默认的进程是sh，当sh执行后容器就会退出，官方提供的nginx镜像默认在容器内启动第一个ID为nginx的ID)，使用`docker inspect [NAME|ID]`查看容器和镜像的详细信息。
    ```
    nginx:
         "Cmd": [
@@ -51,20 +55,29 @@
    docker run busybox:latest    #运行busybox容器后因为sh结束容器就会结束
    docker run -d nginx:latest   #运行nginx容器守护进程为nginx的进程   
    ```
-* docker run常用参数：
+* docker run常用参数与指令：
    ```
-    -d             #将容器放入到后台
-    -t             #
-    -i             #
-    --name         #运行容器
-    --rm           #
+    -d             # 将容器放入到后台
+    -t             # 创建一个tty终端
+    -i             # 打开标准输入
+    --name         # 自定义容器名称
+    --rm           # 容器运行完后删除容器
+    
+  docker start|stop|restart <name|id>  #停止关闭重启容器
+  docker exec -ti nginx:latest /bin/bash # 打开bash进入一个正在运行容器 
+  docker ps｜ps -a        # 查看运行的容器或所有容器
+  docler logs｜logs -f      # 查看日志或实时查看
+  docker rm <name｜id> # 删除容器
+  docker history <name | id> #查看容器内的历史记录
+  
     
    ```
 
 ##### 四. 私有仓库
-* 仓库是镜像的集合，docker官方提供一个本地的私有仓库**docker-registry**，实际中工作中很多镜像都需要定制，推送到本地仓库来维护。如果没有ssl认证，修改/etc/docker/daemon.json。外有还有一些开源的仓库[**harbor**](https://github.com/goharbor/harbor)，harbor通过web界面管理docker镜像并且还包含用户权限设置、搜索等功能。
+* 仓库是镜像的集合，docker官方提供一个本地的私有仓库**docker-registry**，实际中工作中很多镜像都需要定制，推送到本地仓库来维护。如果没有ssl认证，修改/etc/docker/daemon.json，之后通过`docker info`查看。外有还有一些开源的仓库[**harbor**](https://github.com/goharbor/harbor)，harbor通过web界面管理docker镜像并且还包含用户权限设置、搜索镜像等功能。
 ```
 {
+  "registry-mirrors": ["https://test.registry.com"]， #修改默认获取镜像仓库地址
   "insecure-registries": ["test.registry.com"] # 取消ssl认证
 {
 ```
@@ -77,7 +90,7 @@ docker logout   #退出仓库
 * 一个仓库包含不同版本的镜像,例如：`printsmile/nginx:1.10.1`、`printsmile/nginx:1.9` 前面代表仓库名称后面是nginx的版本信息，另外一种方式`test.image.com/printmsile/nginx.:1.10.1`，通过第三方仓库pull，push时需要指定服务器地址，而test.image.com就服务器地址，修改镜像名称推送到私有仓库，通过使用`docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]` 
 例如：
 ```
-   docker tag nginx:latest test.registry.com/printsmile/nginx:1.10.1 #修改nginx:latest 名称
+   docker tag nginx:latest test.registry.com/printsmile/nginx:1.10.1 #修改nginx:latest名称
    docker push test.registry.com/printsmile/nginx:1.10.1 #推送到私有仓库
 ```
 * 除了私有仓库来存储镜像，docker还提供倒入倒出的方式：
@@ -85,8 +98,60 @@ docker logout   #退出仓库
    docker save nginx:latest -o nginx.tar #倒出镜像
    docker load -i nginx.tar  #倒入镜像
 ```
+##### 五. 数据持久化
+![5.png](https://github.com/Myrecord/Docker/blob/master/5.png)
+* 很多有状态的服务需要保存数据比如Mysql、Redis，默认容器产生的数据会随着容器删除而被删除，docker中提供对数据持久保存的方式，容器中的目录可与宿主机中的目录进行绑定，在宿主机对数据修改或者删除时容器也会随之而改变，另外容器被删除后数据将会保留。
+* 在创建容器时指定 **-v**参数，同时可以在挂载的数据目录设置读、写权限默认为读写，多个容器可以同时共享挂载一个数据盘。
 
-##### 五. docker中的网络模型
+共享数据盘：
+```
+    -v：挂载本地目录或文件与容器绑定。(-v可指定多次)
+    
+    docker run -d --name web -v /data/www/html:/usr/share/nginx/html nginx:latest #将本地的nginx网页目录挂载到容器中
+    docker inspect web
+    "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/data/www/html",
+                "Destination": "/usr/share/nginx/html",  #mounts字段显示来挂载信息
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ]
+        
+    docker run -ti --name test1 -v /data/www/html:/data busybox:latest
+    docker inspect test1
+    "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/data/www/html",
+                "Destination": "/data",                  #两个容器使用宿主机上同一个目录共享数据
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ],
+```
+复制数据卷--volumes-from：
+   ```
+      docker run -ti --name test2 --volumes-from web busybox:latest   #复制一个已存在的容器数据卷
+   ```
+数据卷权限：
+   ```
+      docker run -ti --name test1 -v /data/www/html:/data:ro busybox:latest  #容器内的/data目录为只读模式
+      在容器内删除数据就会报错：
+         rm: can't remove 'aa': Read-only file system
+   ```
+
+
+
+##### 六.Dockerfile与docker commit
+![6.png](https://github.com/Myrecord/Docker/blob/master/6.png)
+* Dockerfile只是一个普通的文本文件，默认并不存在，使用Dockerfile可快速自定义镜像，文件内有许多相关的指令，每个指令都必须是大写。
+* 在Dockerfile中文件开头必须使用**FROM**指定一个基础镜像，镜像是分层构建，每写一层指令就会在合并时多一层，所以编写Dockerfile时将相关内容的层合为一个层，较少镜像的臃肿。
+
+##### 七. docker中的网络模型
 ![4.jpg](https://github.com/Myrecord/Docker/blob/master/4.jpg)
 * docker支持多种网络模式使用docker info命令可以查看，默认有三种bridge、host、none如果不指定，使用bridge作为默认的网络，在安装完docker后会创建一个docker0的网桥，docker0不仅是一个虚拟网卡在容器内部也充当交换机。容器创建后，会自动创建**一对网卡**，一端在容器内部，一端在物理机中，并且生成在物理机中的一端虚拟网卡接口都被插在docker0网桥中，通过使用brctl show命令查看。
 * bridge：容器之间通信网络接口都连接到docker0网桥中，要想外部访问容器，就需要进行DNAT模式，docker会在iptables中自动创建转发规则，这种模型显然降低带宽的质量，但在测试环境比较适合。
@@ -94,15 +159,4 @@ docker logout   #退出仓库
 同一个IP地址，在容器内开放的端口相当于开发宿主机的端口
 * none：不设置任何网络模型，如果启动容器不需要网络可指定，容器内部只有一个lo接口。
 * 另外一种网络模型容器之间也可以共享网络，两个容器使用同一个网络命名空间容器通过lo地址可互相访问，但文件系统、主机名称并不共享。
-
-##### 六. 数据如何持久化？
-![5.png](https://github.com/Myrecord/Docker/blob/master/5.png)
-* 很多有状态的服务需要保存数据比如Mysql、Redis，默认容器产生的数据会随着容器删除而被删除，docker中提供对数据持久保存的方式，容器中的数据卷可与宿主机中的数据卷进行绑定，在宿主机对数据修改或者删除时容器也会随之而改变，另外容器被删除后数据将会保留。
-* 同时多个容器可以同时共享挂载一个数据盘或复制前一个容器的数据盘
-
-##### 七. Dokerfile是什么？
-![6.png](https://github.com/Myrecord/Docker/blob/master/6.png)
-* Dockerfile只是一个普通的文本文件，默认并不存在，使用Dockerfile可快速自定义镜像，文件内有许多相关的指令，每个指令都必须是大写。
-* 在Dockerfile中文件开头必须使用**FROM**指定一个基础镜像，镜像是分层构建，每写一层指令就会在合并时多一层，所以编写Dockerfile时将相关内容的层合为一个层，较少镜像的臃肿。
-
 
