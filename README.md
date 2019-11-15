@@ -2,7 +2,7 @@
   
    [二. docker架构如何工作？](https://github.com/Myrecord/Docker/blob/master/README.md)
   
-   [三. docker镜像如何实现？](https://github.com/Myrecord/Docker/blob/master/README.md)
+   [三. 镜像与容器](https://github.com/Myrecord/Docker/blob/master/README.md)
   
    [四. docker中的网络模型](https://github.com/Myrecord/Docker/blob/master/README.md)
   
@@ -25,10 +25,15 @@
 ![2.jpg](https://github.com/Myrecord/Docker/blob/master/2.jpg)
 * Docker是C/S架构模式运行,支持三种模式监听:ipv4、ipv6、Unix socket文件(默认),Docker在后台启动Docker daemon守护进程监听本地的socket文件,Docker client执行命令启动容器时Docker server默认使用https从仓库中获取，如果本地不存在则从dokcer hub中获取镜像文件,镜像文件是分层构建,底层的镜像文件为只读模式,最终将多层镜像文件汇总成一个读写层提供给容器运行并存放到本地。
 
-##### 三. 镜像
+##### 三. 镜像与容器
 ![3.jpg](https://github.com/Myrecord/Docker/blob/master/3.jpg)
-* 镜像其实就是一个包含完整的操作系统，在最低层为bootfs、其次rootfs(系统)都为只读模式,早期docker版本使用的**Aufs(高级多层统一文件系统)** 新版本中docker默认使用文件系统为**overla2(联合挂载)** 层级可以复用、追加，假设同时有两个版本的nginx镜像底层会有相同依赖的层级不需要创建新的层级，也可以添加新的功能，但如果删除其中一个nginx镜像，并不会删除依赖的层级。
-
+* 镜像其实就是一个包含完整的操作系统，在最低层为bootfs、其次rootfs(系统)都为只读模式,在此之上每添加一层为可写层，最后通过联合挂载的方式构建一个读写层。早期docker版本使用的**Aufs(高级多层统一文件系统)** 新版本中docker默认使用文件系统为**overla2(联合挂载)** 层级可以复用、追加。
+* docker中大部分命令都与shell类似，在获取时如果不指定版本，默认则拉去latest版本。
+   ```
+   docker pull nginx   #获取镜像
+   docker images  #查看镜像
+   docker image rm nginx：latest #删除镜像
+   ```
 
 ##### 四. 私有仓库
 * 仓库是镜像的集合，docker官方提供一个本地的私有仓库**docker-registry**，实际中工作中很多镜像都需要定制，推送到本地仓库来维护。如果没有ssl认证，修改/etc/docker/daemon.json。外有还有一些开源的仓库[**harbor**](https://github.com/goharbor/harbor)，harbor通过web界面管理docker镜像并且还包含用户权限设置、搜索等功能。
