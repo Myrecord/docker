@@ -35,11 +35,8 @@
    docker images                #查看镜像
    docker image rm nginx:latest #删除镜像
    ```
-* 容器: 容器就好比进程一样，但不同的是容器有自己独立的命名空间与系统隔离，进程是装载在容器内的。建议一个容器只运行一个进程，而容器内的第一个进程ID应该为应用程序的进程ID(busybox默认的进程是sh，当sh执行后容器就会退出，官方提供的nginx镜像默认在容器内启动第一个ID为nginx的ID)，使用`docker inspect [NAME|ID]`查看容器和镜像的详细信息。
+* 容器: 容器就好比进程一样，但不同的是容器有自己独立的命名空间与系统隔离，进程是装载在容器内的。官方建议一个容器只运行一个进程，而容器内的第一个进程ID应该为应用程序的进程ID(busybox默认的进程是sh，当sh执行后容器就会退出，官方提供的nginx镜像默认在容器内启动第一个ID为nginx的ID)，使用`docker inspect [NAME|ID]`查看容器和镜像的详细信息。
    ```
-   docker run busybox:latest    #运行busybox容器后因为shell结束容器就会结束
-   docker run -d nginx:latest   #运行nginx容器守护进程为nginx的进程（nginx是在前台执行使用-d参数放入后台） 
-   
    nginx:
         "Cmd": [
                 "nginx",                   #nginx容器默认启动的指令
@@ -50,11 +47,18 @@
         "Cmd": [
                 "sh"                       #busybox容器默认启动的指令
             ]     
+   
+   docker run busybox:latest    #运行busybox容器后因为sh结束容器就会结束
+   docker run -d nginx:latest   #运行nginx容器守护进程为nginx的进程   
    ```
-* 查看容器运行：
+* docker run常用参数：
    ```
-   docker ps    #查看正在运行的容器
-   docker ps -a #查看所有容器
+    -d             #将容器放入到后台
+    -t             #
+    -i             #
+    --name         #运行容器
+    --rm           #
+    
    ```
 
 ##### 四. 私有仓库
