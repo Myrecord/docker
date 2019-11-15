@@ -36,6 +36,7 @@
    docker pull nginx            #获取镜像
    docker images                #查看镜像
    docker image rm nginx:latest #删除镜像
+   docker search nginx          #搜索镜像
    ```
 * docker对镜像或容器操作使用名称或者**ID前4位**即可。
 
@@ -101,19 +102,18 @@ docker logout   #退出仓库
 ##### 五. 数据持久化
 ![5.png](https://github.com/Myrecord/Docker/blob/master/5.png)
 * 很多有状态的服务需要保存数据比如Mysql、Redis，默认容器产生的数据会随着容器删除而被删除，docker中提供对数据持久保存的方式，容器中的目录可与宿主机中的目录进行绑定，在宿主机对数据修改或者删除时容器也会随之而改变，另外容器被删除后数据将会保留。
-* 在创建容器时指定 **-v**参数，同时可以在挂载的数据目录设置读、写权限默认为读写，多个容器可以同时共享挂载一个数据盘。
+* 在创建容器时指定 **-v**参数，可以设置数据目录的权限，多个容器也可以同时共享挂载一个数据盘，复用。使用`docker inspect <name|ID>`查看容器Mounts字段。
 
 共享数据盘：
 ```
     -v：挂载本地目录或文件与容器绑定。(-v可指定多次)
     
     docker run -d --name web -v /data/www/html:/usr/share/nginx/html nginx:latest #将本地的nginx网页目录挂载到容器中
-    docker inspect web
     "Mounts": [
             {
                 "Type": "bind",
                 "Source": "/data/www/html",
-                "Destination": "/usr/share/nginx/html",  #mounts字段显示来挂载信息
+                "Destination": "/data",  
                 "Mode": "",
                 "RW": true,
                 "Propagation": "rprivate"
@@ -121,12 +121,11 @@ docker logout   #退出仓库
         ]
         
     docker run -ti --name test1 -v /data/www/html:/data busybox:latest
-    docker inspect test1
     "Mounts": [
             {
                 "Type": "bind",
-                "Source": "/data/www/html",
-                "Destination": "/data",                  #两个容器使用宿主机上同一个目录共享数据
+                "Source": "/data/www/html",           #两个容器使用宿主机上同一个目录共享数据
+                "Destination": "/data",                  
                 "Mode": "",
                 "RW": true,
                 "Propagation": "rprivate"
@@ -136,12 +135,33 @@ docker logout   #退出仓库
 复制数据卷--volumes-from：
    ```
       docker run -ti --name test2 --volumes-from web busybox:latest   #复制一个已存在的容器数据卷
+      "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/data/www/html",
+                "Destination": "/data",
+                "Mode": "",
+                "RW": false,
+                "Propagation": "rprivate"
+            }
+        ],
+
    ```
 数据卷权限：
    ```
       docker run -ti --name test1 -v /data/www/html:/data:ro busybox:latest  #容器内的/data目录为只读模式
-      在容器内删除数据就会报错：
-         rm: can't remove 'aa': Read-only file system
+      在容器内删除数据就会报错： rm: can't remove 'aa': Read-only file system
+      "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/data/www/html",
+                "Destination": "/data",
+                "Mode": "ro",                #这里的mode为ro只读
+                "RW": false,
+                "Propagation": "rprivate"
+            }
+        ],
+
    ```
 
 
