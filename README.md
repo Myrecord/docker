@@ -108,7 +108,7 @@ docker logout   #退出仓库
 ```
     -v：挂载本地目录或文件与容器绑定。(-v可指定多次)
     
-    docker run -d --name web -v /data/www/html:/usr/share/nginx/html nginx:latest #将本地的nginx网页目录挂载到容器中
+ docker run -d --name web -v /data/www/html:/usr/share/nginx/html nginx:latest #将本地的nginx网页目录挂载到容器中
     "Mounts": [
             {
                 "Type": "bind",
@@ -120,7 +120,7 @@ docker logout   #退出仓库
             }
         ]
         
-    docker run -ti --name test1 -v /data/www/html:/data busybox:latest
+ docker run -ti --name test1 -v /data/www/html:/data busybox:latest
     "Mounts": [
             {
                 "Type": "bind",
