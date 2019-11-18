@@ -194,9 +194,14 @@ docker logout   #退出仓库
     <missing>        4 weeks ago      /bin/sh -c #(nop)  CMD ["bash"]                 0B                  
     <missing>        4 weeks ago      /bin/sh -c #(nop) ADD file:74b2987cacab5a6b0…   69.2MB   
  ```
-* Dockerfile：通过Dockerfile内部的指令用户可自定义镜像应该如何构建，通过环境变量的方式传递给容器运行显然比较灵活。
-  * 
-
+* Dockerfile：通过Dockerfile内部的指令用户可自定义镜像应该如何构建，dockerfile与shell脚本类似，编辑好后使用`docker build`指令来创建。
+  * 指令必须为大写，并且第一行开头必须为FROM
+  * 每添加一个指令就会在镜像中生成一层，所以相似的内容尽量合并为一层减少镜像的臃肿
+  * 尽可能通过环境变量的方式在运行容器时传递参数即可，保证镜像原生
+  
+  使用dockerfile制作nginx反向代理镜像：
+  ```
+  ```
 
 
 ##### 七. docker中的网络模型
