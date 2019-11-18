@@ -106,14 +106,14 @@ docker logout   #退出仓库
 
 共享数据盘：
 ```
-    -v：挂载本地目录或文件与容器绑定。(-v可指定多次)
+    -v：挂载本地目录或文件与容器绑定。(-v可指定多次，前面指定本地目录，后面为容器内的目录)
     
- docker run -d --name web -v /data/www/html:/usr/share/nginx/html nginx:latest #将本地的nginx网页目录挂载到容器中
+ docker run -d --name web -v /data/www/html:/data nginx:latest 
     "Mounts": [
             {
                 "Type": "bind",
                 "Source": "/data/www/html",
-                "Destination": "/data",  
+                "Destination": "/data",            
                 "Mode": "",
                 "RW": true,
                 "Propagation": "rprivate"
