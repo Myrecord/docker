@@ -8,7 +8,7 @@
    
    [五. 数据持久化](https://github.com/Myrecord/Docker/blob/master/README.md)
    
-   [六. Dockerfile与docker commti](https://github.com/Myrecord/Docker/blob/master/README.md)
+   [六. Dockerfile与docker commit](https://github.com/Myrecord/Docker/blob/master/README.md)
   
    [七. 网络模型](https://github.com/Myrecord/Docker/blob/master/README.md)
     
