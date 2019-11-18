@@ -100,7 +100,6 @@ docker logout   #退出仓库
    docker load -i nginx.tar  #倒入镜像
 ```
 ##### 五. 数据持久化
-![5.png](https://github.com/Myrecord/Docker/blob/master/5.png)
 * 很多有状态的服务需要保存数据比如Mysql、Redis，默认容器产生的数据会随着容器删除而被删除，docker中提供对数据持久保存的方式，容器中的目录可与宿主机中的目录进行绑定，在宿主机对数据修改或者删除时容器也会随之而改变，另外容器被删除后数据将会保留。
 * 在创建容器时指定 **-v**参数，可以设置容器内数据目录的权限，多个容器也可以同时共享挂载一个数据盘，复用。使用`docker inspect <name|ID>`查看容器Mounts字段。
 
@@ -167,12 +166,40 @@ docker logout   #退出仓库
 
 
 ##### 六.Dockerfile与docker commit
-![6.png](https://github.com/Myrecord/Docker/blob/master/6.png)
-* Dockerfile只是一个普通的文本文件，默认并不存在，使用Dockerfile可快速自定义镜像，文件内有许多相关的指令，每个指令都必须是大写。
-* 在Dockerfile中文件开头必须使用**FROM**指定一个基础镜像，镜像是分层构建，每写一层指令就会在合并时多一层，所以编写Dockerfile时将相关内容的层合为一个层，较少镜像的臃肿。
+* docker commit：基于容器制作镜像，它会将当前容器重新打包为新的镜像，比如当容器内修改了内容、或者要保存容器当前的状态.(**但使用docker commit会保留上一个容器中所有的历史记录**)
+```
+    docker commit：
+               -a：指定作者
+               -c：调用Dockerfile中的指令
+               -m：指定修改信息
+               -p：暂停容器
+               
+    echo "Hello Docker" > /usr/share/nginx/html/index.html  #在容器内修改nginx页面显示的内容
+    docker commit -a "test" -m "修改index文件" nginx:latest new_nginx #生成新的镜像
+ ```
+ ```
+    docker history new_nginx  #查看历史记录
+    
+    IMAGE            CREATED          CREATED BY                                      SIZE   COMMENT
+    8a40b5598543   3 minutes ago      nginx -g daemon off;                            120B   修改index文件**
+    540a289bab6c     3 weeks ago      /bin/sh -c #(nop)  CMD ["nginx" "-g" "daemon…   0B                  
+    <missing>        3 weeks ago      /bin/sh -c #(nop)  STOPSIGNAL SIGTERM           0B                  
+    <missing>        3 weeks ago      /bin/sh -c #(nop)  EXPOSE 80                    0B                  
+    <missing>        3 weeks ago      /bin/sh -c ln -sf /dev/stdout /var/log/nginx…   22B                 
+    <missing>        3 weeks ago      /bin/sh -c set -x     && addgroup --system -…   57MB                
+    <missing>        3 weeks ago      /bin/sh -c #(nop)  ENV PKG_RELEASE=1~buster     0B                  
+    <missing>        3 weeks ago      /bin/sh -c #(nop)  ENV NJS_VERSION=0.3.6        0B                  
+    <missing>        3 weeks ago      /bin/sh -c #(nop)  ENV NGINX_VERSION=1.17.5     0B                  
+    <missing>        4 weeks ago      /bin/sh -c #(nop)  LABEL maintainer=NGINX Do…   0B                  
+    <missing>        4 weeks ago      /bin/sh -c #(nop)  CMD ["bash"]                 0B                  
+    <missing>        4 weeks ago      /bin/sh -c #(nop) ADD file:74b2987cacab5a6b0…   69.2MB   
+ ```
+* Dockerfile：通过Dockerfile内部的指令用户可自定义镜像应该如何构建，通过环境变量的方式传递给容器运行显然比较灵活。
+  * 
+
+
 
 ##### 七. docker中的网络模型
-![4.jpg](https://github.com/Myrecord/Docker/blob/master/4.jpg)
 * docker支持多种网络模式使用docker info命令可以查看，默认有三种bridge、host、none如果不指定，使用bridge作为默认的网络，在安装完docker后会创建一个docker0的网桥，docker0不仅是一个虚拟网卡在容器内部也充当交换机。容器创建后，会自动创建**一对网卡**，一端在容器内部，一端在物理机中，并且生成在物理机中的一端虚拟网卡接口都被插在docker0网桥中，通过使用brctl show命令查看。
 * bridge：容器之间通信网络接口都连接到docker0网桥中，要想外部访问容器，就需要进行DNAT模式，docker会在iptables中自动创建转发规则，这种模型显然降低带宽的质量，但在测试环境比较适合。
 * host：共享宿主机的网络，容器之间访问将不在使用docker0，而是与宿主机使用
