@@ -204,6 +204,11 @@ docker logout   #退出仓库
   
   制作nginx反向代理说明Dokcerfile指令：
   ```
+     nginx_pass/
+         ├── Dockerfile                   #目录结构
+         └── nginx.sh
+     
+     
   ```
 
 
