@@ -210,7 +210,7 @@ docker logout   #退出仓库
       ADD: 类似与COPY，但它可以使用URL方式下载软件包，如果软件包在本地并且是一个压缩包，它会将包添加到镜像中并进行解压
       ENV: 定义变量
       RUN: 运行容器内的shell命令，取决于选择什么作为基础镜像
-   EXPOSE: 声明该镜像要暴露的端口
+   EXPOSE: 声明该镜像要暴露的端口，使用—P才会使用EXPOSE
   WORKDIR: 切换工作目录，如果使用它来切换目录，随后所有上层都会在此目录中
    VOLUME: 指定需要绑定的数据目录
   HEALTHCHECK: 健康状态检查， --interval: 检测间隔默认30s --timeout: 超时时间默认30s --retries: 失败次数默认3次
@@ -341,6 +341,10 @@ PID   USER     TIME  COMMAND
  9191 root      0:00 /bin/sh
  9203 root      0:00 ps
 
+```
+**获取镜像**：
+```
+ docker pull printsmile/nginx_proxy
 ```
 
 ##### 7. docker中的网络模型
