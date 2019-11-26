@@ -210,7 +210,7 @@ docker logout   #退出仓库
       ADD: 类似与COPY，但它可以使用URL方式下载软件包，如果软件包在本地并且是一个压缩包，它会将包添加到镜像中并进行解压
       ENV: 定义变量
       RUN: 运行容器内的shell命令，取决于选择什么作为基础镜像
-   EXPOSE: 声明该镜像要暴露的端口，使用—P才会使用EXPOSE
+   EXPOSE: 声明该镜像要暴露的端口，使用—P时EXPOSE定义的端口才会生效
   WORKDIR: 切换工作目录，如果使用它来切换目录，随后所有上层都会在此目录中
    VOLUME: 指定需要绑定的数据目录
   HEALTHCHECK: 健康状态检查， --interval: 检测间隔默认30s --timeout: 超时时间默认30s --retries: 失败次数默认3次
@@ -347,7 +347,7 @@ PID   USER     TIME  COMMAND
  docker pull printsmile/nginx_proxy
 ```
 
-##### 7. docker中的网络模型
+##### 7. 网络模型
 * docker支持多种网络模式使用docker info命令可以查看，默认有三种bridge、host、none如果不指定，使用bridge作为默认的网络，在安装完docker后会创建一个docker0的网桥，docker0不仅是一个虚拟网卡在容器内部也充当交换机。容器创建后，会自动创建**一对网卡**，一端在容器内部，一端在物理机中，并且生成在物理机中的一端虚拟网卡接口都被插在docker0网桥中，通过使用brctl show命令查看。
 * bridge：容器之间通信网络接口都连接到docker0网桥中，要想外部访问容器，就需要进行DNAT模式，docker会在iptables中自动创建转发规则，这种模型显然降低带宽的质量，但在测试环境比较适合。
 * host：共享宿主机的网络，容器之间访问将不在使用docker0，而是与宿主机使用
