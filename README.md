@@ -213,7 +213,7 @@ docker logout   #退出仓库
    EXPOSE: 声明该镜像要暴露的端口
   WORKDIR: 切换工作目录，如果使用它来切换目录，随后所有上层都会在此目录中
    VOLUME: 指定需要绑定的数据目录
-  HEALTHCHECK: 健康状态检查它有单独的参数 --interval: 检测间隔默认30s --timeout: 超时时间默认30s --retries: 失败次数默认3次
+  HEALTHCHECK: 健康状态检查， --interval: 检测间隔默认30s --timeout: 超时时间默认30s --retries: 失败次数默认3次
                初始状态：starting， 成功状态：healthy，失败状态：unhealthy
   CMD: 指定容器内默认启动的命令，例如：CMD ["nginx","-g","daemon off;"] 参数必须是双引号
   ENTRYPOINT: 类似CMD指令，区别在于它可以传递参数，在它之后都将被当作参数传递。若有CMD指令，CMD指令内容将被当作参数传递给它
