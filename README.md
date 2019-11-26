@@ -214,9 +214,11 @@ docker logout   #退出仓库
   WORKDIR: 切换工作目录，如果使用它来切换目录，随后所有上层都会在此目录中
    VOLUME: 指定需要绑定的数据目录
   HEALTHCHECK: 健康状态检查它有单独的参数 --interval: 检测间隔默认30s --timeout: 超时时间默认30s --retries: 失败次数默认3次
+               初始状态：starting， 成功状态：healthy，失败状态：unhealthy
   CMD: 指定容器内默认启动的命令，例如：CMD ["nginx","-g","daemon off;"] 参数必须是双引号
-  ENTRYPOINT: 它可以替代CMD，在它之后的内容都将被视为参数单独使用使用-e传递参数。若还有CMD指令，CMD指令内容将被当作参数传递给它
-  USER: 切换用户身份，切换后其他上层都将使用此用户
+  ENTRYPOINT: 类似CMD指令，区别在于它可以传递参数，在它之后都将被当作参数传递。若有CMD指令，CMD指令内容将被当作参数传递给它
+              它可以使用-e来传递参数
+  USER: 切换用户身份，切换后其他上层都将使用此用户，但要求用户必须预先创建
   ```
 
 * 例nginx反向代理：
@@ -322,7 +324,10 @@ docker build -t nginx_proxy:v1 .  -t:指定tag名称
 ```
 docker run -d --name ngproxy -e PROXY_NAME=test PROXY_IP=1.1.1.1 PROXY_PORT=3321 nginx_proxy:v1
 
-ENTRYPOINT使用-e传递参数，Dcokerfile会先执行这个脚本，ENTRYPOINT它默认会调用shell -c的来解释，脚本最后exec $@,exec启动过一个新的进程，$@是shell中表示所有参数，在dockerfile中CMD指定的内容将被当作参数传递给了$@,所有相当于 exec nginx -g daemon off，最后在容器内第一个进程是nginx
+ENTRYPOINT使用-e传递参数，Dcokerfile会先执行这个脚本，ENTRYPOINT它默认会调用shell -c的来解释，
+脚本最后exec $@,exec启动一个新的进程，$@是shell中表示所有参数，
+在dockerfile中CMD指定的内容将被当作参数传递给了$@,所有相当于 exec nginx -g daemon off，
+最后在容器内第一个进程是nginx
 
 每次在运行这个容器时，使用-e参数就可以很方便传递参数到脚本所定义的变量了。
 
