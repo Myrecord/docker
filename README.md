@@ -202,11 +202,141 @@ docker logout   #退出仓库
   * **每添加一个指令就会在镜像中生成一层，所以相似的内容尽量合并为一层减少镜像的臃肿**
   * **尽可能通过环境变量的方式在运行容器时传递参数即可，保证镜像原生**
   
-  制作nginx反向代理说明Dokcerfile指令：
+  常用Dokcerfile指令：  
   ```
-   
+     FROM: 指定选择基础镜像，例如：FROM alpine:latest
+    LABLE: 用于表述镜像信息，指定作者
+     COPY: 将宿主机中的文件复制到image中
+      ADD: 类似与COPY，但它可以使用URL方式下载软件包，如果软件包在本地并且是一个压缩包，它会将包添加到镜像中并进行解压
+      ENV: 定义变量
+      RUN: 运行容器内的shell命令，取决于选择什么作为基础镜像
+   EXPOSE: 声明该镜像要暴露的端口
+  WORKDIR: 切换工作目录，如果使用它来切换目录，随后所有上层都会在此目录中
+   VOLUME: 指定需要绑定的数据目录
+  HEALTHCHECK: 健康状态检查它有单独的参数 --interval: 检测间隔默认30s --timeout: 超时时间默认30s --retries: 失败次数默认3次
+  CMD: 指定容器内默认启动的命令，例如：CMD ["nginx","-g","daemon off;"] 参数必须是双引号
+  ENTRYPOINT: 它可以替代CMD，在它之后的内容都将被视为参数单独使用使用-e传递参数。若还有CMD指令，CMD指令内容将被当作参数传递给它
+  USER: 切换用户身份，切换后其他上层都将使用此用户
   ```
 
+* 例nginx反向代理：
+
+ **目录结构**：
+```
+nginx_proxy/
+├── Dockerfile
+└── nginx_proxy.sh
+```
+**Dockerfile**：
+```
+FROM alpine:latest
+
+ENV NGINX_VERSION=1.10.3 NGINX_SRC=/usr/local/src NGINX_COMPILE=/usr/local/nginx
+
+RUN CONFIG="\
+    --prefix=/usr/local/nginx \
+    --with-http_ssl_module \
+    --with-http_stub_status_module" \ 
+    && sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk add --no-cache curl pcre pcre-dev \
+    && apk add --no-cache --virtual mypacks gcc g++ make openssl-dev zlib-dev openssl-dev \
+    && mkdir -p $NGINX_SRC \
+    && wget http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -P $NGINX_SRC/ \
+    && tar zxvf $NGINX_SRC/nginx-$NGINX_VERSION.tar.gz -C $NGINX_SRC \
+    && cd $NGINX_SRC/nginx-$NGINX_VERSION \
+    && ./configure $CONFIG \
+    && sed -i 's/-Werror//'g $NGINX_SRC/nginx-$NGINX_VERSION/objs/Makefile \
+    && make \
+    && make install \
+    && apk del mypacks \
+    && rm -rf $NGINX_SRC/*
+
+COPY nginx_proxy.sh /bin/
+
+EXPOSE 80
+
+HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD curl -q http://localhost/ || exit 1
+
+CMD ["/usr/local/nginx/sbin/nginx","-g","daemon off;"]
+
+ENTRYPOINT ["/bin/nginx_proxy.sh"]
+```
+**nginx_proxy.sh**:
+```
+#!/bin/sh
+
+
+cat > /usr/local/nginx/conf/nginx.conf << EOF 
+user  ${NGINX_USER:-root};
+worker_processes  ${NGINX_CPU:-4};
+
+#error_log  /var/log/nginx/error.log warn;
+pid        /var/run/nginx.pid;
+
+
+events {
+    worker_connections  ${WORKER_CONNECTIONS:-65535};
+}
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    #log_format  main  '\$remote_addr - \$remote_user [\$time_local] "\$request" '
+    #                  '\$status \$body_bytes_sent "\$http_referer" '
+    #                  '"\$http_user_agent" "\$http_x_forwarded_for"';
+
+    #access_log  logs/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+upstream ${PROXY_NAME:-proxy} {
+    server ${PROXY_IP:-127.0.0.1}:${PROXY_PORT:-8080} weight=1;
+}
+
+server {
+    listen ${PORT:-80};
+    server_name ${NAME:-127.0.0.1};
+    location / {
+	 proxy_pass http://${PROXY_NAME:-proxy};
+	 proxy_set_header Host \$host;
+         proxy_set_header X-Real-IP \$remote_addr;
+         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    }
+ }
+}
+EOF
+
+exec "$@"
+```
+**build Dockerfile**:
+```
+docker build -t nginx_proxy:v1 .  -t:指定tag名称
+```
+**运行容器**
+```
+docker run -d --name ngproxy -e PROXY_NAME=test PROXY_IP=1.1.1.1 PROXY_PORT=3321 nginx_proxy:v1
+
+ENTRYPOINT使用-e传递参数，Dcokerfile会先执行这个脚本，ENTRYPOINT它默认会调用shell -c的来解释，脚本最后exec $@,exec启动过一个新的进程，$@是shell中表示所有参数，在dockerfile中CMD指定的内容将被当作参数传递给了$@,所有相当于 exec nginx -g daemon off，最后在容器内第一个进程是nginx
+
+每次在运行这个容器时，使用-e参数就可以很方便传递参数到脚本所定义的变量了。
+
+/ # ps
+PID   USER     TIME  COMMAND
+    1 root      0:00 nginx: master process /usr/local/nginx/sbin/nginx -g daemon off;
+    8 root      0:00 nginx: worker process
+    9 root      0:00 nginx: worker process
+   10 root      0:00 nginx: worker process
+   11 root      0:00 nginx: worker process
+ 9191 root      0:00 /bin/sh
+ 9203 root      0:00 ps
+
+```
 
 ##### 7. docker中的网络模型
 * docker支持多种网络模式使用docker info命令可以查看，默认有三种bridge、host、none如果不指定，使用bridge作为默认的网络，在安装完docker后会创建一个docker0的网桥，docker0不仅是一个虚拟网卡在容器内部也充当交换机。容器创建后，会自动创建**一对网卡**，一端在容器内部，一端在物理机中，并且生成在物理机中的一端虚拟网卡接口都被插在docker0网桥中，通过使用brctl show命令查看。
