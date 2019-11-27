@@ -66,6 +66,11 @@
     -i             # 打开标准输入
     --name         # 自定义容器名称
     --rm           # 容器运行完后删除容器
+    --hostname	   # 修改容器hostname
+    --add-host	   # host文件解析记录
+    --dns	   # 添加dns
+    -p		   # 指定容器端口映射到宿主机端口
+    -P		   # 在宿主机随机一个端口映射容器内的端口
     
   docker start|stop|restart <name|id>  #停止关闭重启容器
   docker exec -ti nginx:latest /bin/bash # 打开bash进入一个正在运行容器 
@@ -231,11 +236,11 @@ nginx_proxy/
 ```
 **Dockerfile**：
 ```
-FROM alpine:latest
+FROM alpine:latest		#选择alpine做基础
 
-ENV NGINX_VERSION=1.10.3 NGINX_SRC=/usr/local/src NGINX_COMPILE=/usr/local/nginx
+ENV NGINX_VERSION=1.10.3 NGINX_SRC=/usr/local/src NGINX_COMPILE=/usr/local/nginx  #定义变量
 
-RUN CONFIG="\
+RUN CONFIG="\   #将下载包和编译全部放在一层，--virtual NAME使用虚拟编译环境，一些GCC的东西并不需要安装，编译完后掉减少镜像大小
     --prefix=/usr/local/nginx \
     --with-http_ssl_module \
     --with-http_stub_status_module" \ 
@@ -255,13 +260,13 @@ RUN CONFIG="\
 
 COPY nginx_proxy.sh /bin/
 
-EXPOSE 80
+EXPOSE 80  #若指定-P它才会起作用
 
 HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD curl -q http://localhost/ || exit 1
 
-CMD ["/usr/local/nginx/sbin/nginx","-g","daemon off;"]
+CMD ["/usr/local/nginx/sbin/nginx","-g","daemon off;"] 
 
-ENTRYPOINT ["/bin/nginx_proxy.sh"]
+ENTRYPOINT ["/bin/nginx_proxy.sh"] #执行脚本并使用-e修改变量，随后CMD里都被当作参数传递给它
 ```
 **nginx_proxy.sh**:
 ```
@@ -348,10 +353,15 @@ PID   USER     TIME  COMMAND
 ```
 
 ##### 7. 网络模型
-* docker支持多种网络模式使用docker info命令可以查看，默认有三种bridge、host、none如果不指定，使用bridge作为默认的网络，在安装完docker后会创建一个docker0的网桥，docker0不仅是一个虚拟网卡在容器内部也充当交换机。容器创建后，会自动创建**一对网卡**，一端在容器内部，一端在物理机中，并且生成在物理机中的一端虚拟网卡接口都被插在docker0网桥中，通过使用brctl show命令查看。
-* bridge：容器之间通信网络接口都连接到docker0网桥中，要想外部访问容器，就需要进行DNAT模式，docker会在iptables中自动创建转发规则，这种模型显然降低带宽的质量，但在测试环境比较适合。
-* host：共享宿主机的网络，容器之间访问将不在使用docker0，而是与宿主机使用
-同一个IP地址，在容器内开放的端口相当于开发宿主机的端口
-* none：不设置任何网络模型，如果启动容器不需要网络可指定，容器内部只有一个lo接口。
-* 另外一种网络模型容器之间也可以共享网络，两个容器使用同一个网络命名空间容器通过lo地址可互相访问，但文件系统、主机名称并不共享。
+使用`docker network ls`列出docker中的网络。
+```
+NETWORK ID          NAME                DRIVER              SCOPE
+5d6f7f55eb12        bridge              bridge              local
+218c6ad306d6        host                host                local
+555ae4f90af5        none                null                local
+```
+* Bridge：桥接网络成对出现，docker中使用的默认网络,在宿主机中生成docker0的网桥，在容器内部生成另一半
+*   Host：开放式网络，容器继承宿主机的网络，和宿主机共用一个Network命名空间
+*   None：封闭网络，不设置任何网络，容器内部只有一个lo接口
+* Container：联盟网络，两个容器使用同一个网络命名空间容器通过lo地址可互相访问
 
