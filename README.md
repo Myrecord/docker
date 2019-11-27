@@ -360,7 +360,7 @@ NETWORK ID          NAME                DRIVER              SCOPE
 218c6ad306d6        host                host                local
 555ae4f90af5        none                null                local
 ```
-* Bridge：桥接网络成对出现，docker中使用的默认网络,在宿主机中生成docker0的网桥，在容器内部生成另一半
+* Bridge：桥接网络，成对出现docker中使用的默认网络,在宿主机中生成docker0的网桥，在容器内部生成另一半
 *   Host：开放网络，容器继承宿主机的网络，和宿主机共用一个Network命名空间
 *   None：封闭网络，不设置任何网络，容器内部只有一个lo接口
 * Container：联盟网络，两个容器使用同一个网络命名空间容器通过lo地址可互相访问
