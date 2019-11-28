@@ -61,16 +61,16 @@
    ```
 * docker run常用参数与指令：
    ```
-    -d             # 将容器放入到后台
-    -t             # 创建一个tty终端
-    -i             # 打开标准输入
-    --name         # 自定义容器名称
-    --rm           # 容器运行完后删除容器
-    --hostname	   # 修改容器hostname
-    --add-host	   # host文件解析记录
-    --dns	   # 添加dns
-    -p		   # 指定容器端口映射到宿主机端口<Host_port>:<Container_port>|| <Host_ip:Host_port>:<Container_port>
-    -P		   # 
+    -d       # 将容器放入到后台
+    -t       # 创建一个tty终端
+    -i       # 打开标准输入
+    --name   # 自定义容器名称
+    --rm     # 容器运行完后删除容器
+    --hostname	 # 修改容器hostname
+    --add-host	 # 添加host文件解析记录<Domin:IP>
+    --dns	 # 添加dns
+    -p    # 指定容器端口映射到宿主机端口<Host_port>:<Container_port>|| <Host_ip:Host_port>:<Container_port>
+    -P    # 在docker中使用EXPOSE指定的端口，使用该参数会随机在宿主机中开发一个端口作为映射
     
   docker start|stop|restart <name|id>  #停止关闭重启容器
   docker exec -ti nginx:latest /bin/bash # 打开bash进入一个正在运行容器 
@@ -78,6 +78,7 @@
   docler logs｜logs -f      # 查看日志或实时查看
   docker rm <name｜id> # 删除容器
   docker history <name | id> #查看容器内的历史记录
+  docker port <container_name> #查看容器暴露的端口信息
   
     
    ```
@@ -454,3 +455,16 @@ lo        Link encap:Local Loopback
           collisions:0 txqueuelen:1000 
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
 ```
+也可以自定义网络使用`docker network create [OPTIONS] NETWORK`：
+```
+docker network create -d bridge --subnet "192.168.0.0/24" --gateway "192.168.0.1" mynet
+
+#docker network ls 
+NETWORK ID          NAME                DRIVER              SCOPE
+c820d4370c3f        bridge              bridge              local
+d9d3ed304e67        harbor_harbor       bridge              local
+218c6ad306d6        host                host                local
+c3b5f37cacce        mynet               bridge              local
+555ae4f90af5        none                null                local
+```
+##### 8. 资源管理
