@@ -69,8 +69,8 @@
     --hostname	   # 修改容器hostname
     --add-host	   # host文件解析记录
     --dns	   # 添加dns
-    -p		   # 指定容器端口映射到宿主机端口
-    -P		   # 在宿主机随机一个端口映射容器内的端口
+    -p		   # 指定容器端口映射到宿主机端口<Host_port>:<Container_port>|| <Host_ip:Host_port>:<Container_port>
+    -P		   # 
     
   docker start|stop|restart <name|id>  #停止关闭重启容器
   docker exec -ti nginx:latest /bin/bash # 打开bash进入一个正在运行容器 
@@ -366,7 +366,7 @@ NETWORK ID          NAME                DRIVER              SCOPE
 * Container：联盟网络，两个容器使用共享一个Network命令空间容器通过lo地址可互相访问
 
 **Host与Container只是Network命名空间共享，其他命名空间都处于隔离
-通过使用`--network`选这网络模型：**
+通过使用`--network`选择网络模型：**
 
 **Bridge**：
 ```
