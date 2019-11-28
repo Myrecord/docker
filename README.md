@@ -363,5 +363,93 @@ NETWORK ID          NAME                DRIVER              SCOPE
 * Bridge：桥接网络，成对出现docker中使用的默认网络,在宿主机中生成docker0的网桥，在容器内部生成另一半
 *   Host：开放网络，容器继承宿主机的网络，和宿主机共用一个Network命名空间
 *   None：封闭网络，不设置任何网络，容器内部只有一个lo接口
-* Container：联盟网络，两个容器使用同一个网络命名空间容器通过lo地址可互相访问
+* Container：联盟网络，两个容器使用共享一个Network命令空间容器通过lo地址可互相访问
+**Host与Container只是Network命名空间共享，其他命名空间都处于隔离**
+通过使用`--network`选这网络模型：
 
+**Bridge**：
+```
+docker run -ti --rm  busybox:latest #默认网络是bridge所以不需要指定--network
+
+#ifconfig 
+eth0      Link encap:Ethernet  HWaddr 02:42:AC:12:00:04  #在容器内另一半虚拟网卡
+          inet addr:172.18.0.4  Bcast:172.18.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+```
+**Host**：
+```
+docker run -ti --rm --network host  busybox:latest #与宿主机共享一个Network命名空间
+
+#ifconfig
+docker0   Link encap:Ethernet  HWaddr 02:42:E3:20:F7:10  
+          inet addr:172.18.0.1  Bcast:172.18.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:123025 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:198618 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:5350540 (5.1 MiB)  TX bytes:1460011979 (1.3 GiB)
+
+eth0      Link encap:Ethernet  HWaddr 00:16:3E:08:4C:CD  
+          inet addr:172.17.112.50  Bcast:172.17.127.255  Mask:255.255.240.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:696605611 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:359099329 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1046188926127 (974.3 GiB)  TX bytes:27747472629 (25.8 GiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:926290 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:926290 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:70808985 (67.5 MiB)  TX bytes:70808985 (67.5 MiB)
+```
+**Container**：    
+```
+docker run -ti --rm --name test1  busybox:latest    #需要创建两个容器第二个容器网络指向第一个，
+docker run -ti --name test2 --network container:test1 busybox:latest 
+
+#ifconfig					    #两个容器的网络地址一样
+eth0      Link encap:Ethernet  HWaddr 02:42:AC:12:00:04  
+          inet addr:172.18.0.4  Bcast:172.18.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+```
+**None**:
+```
+docker run -ti --rm --network none  busybox:latest 
+
+#ifconfig
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+```
