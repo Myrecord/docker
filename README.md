@@ -364,8 +364,9 @@ NETWORK ID          NAME                DRIVER              SCOPE
 *   Host：开放网络，容器继承宿主机的网络，和宿主机共用一个Network命名空间
 *   None：封闭网络，不设置任何网络，容器内部只有一个lo接口
 * Container：联盟网络，两个容器使用共享一个Network命令空间容器通过lo地址可互相访问
-**Host与Container只是Network命名空间共享，其他命名空间都处于隔离**
-通过使用`--network`选这网络模型：
+
+**Host与Container只是Network命名空间共享，其他命名空间都处于隔离
+通过使用`--network`选这网络模型：**
 
 **Bridge**：
 ```
