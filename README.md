@@ -366,8 +366,7 @@ NETWORK ID          NAME                DRIVER              SCOPE
 *   None：封闭网络，不设置任何网络，容器内部只有一个lo接口
 * Container：联盟网络，两个容器使用共享一个Network命令空间容器通过lo地址可互相访问
 
-**Host与Container只是Network命名空间共享，其他命名空间都处于隔离
-通过使用`--network`选择网络模型：**
+**Host与Container只是Network命名空间共享，其他命名空间都处于隔离，通过使用`--network`选择网络模型：**
 
 **Bridge**：
 ```
@@ -468,4 +467,20 @@ c3b5f37cacce        mynet               bridge              local
 555ae4f90af5        none                null                local
 ```
 ##### 8. 管理资源管理
-* 
+* 默认容器没有任何资源限制，若某个容器出现异常情况就会占用所有宿主机资源，`docker run`时提供参数来限制容器所占用的cpu、mem资源
+
+**常用参数**：
+```
+--cpus:
+--cpu-shares:
+--cpuset-cpus
+
+--m: 限制容器使用最大内存单位：k、b、m、g
+--memory-swap: 设置容器swap大小，RAM是正数的前提下，如果swap设置为：
+		-1: 使用宿主机中所有的swap空间
+		 0: 未设置(unset)
+		 unset: swap空间等于 2 * M
+		 正数：如果swap与RAM都为正数，swap=swap-ram，如果两个值相等swap则无效
+--oom-kill-disable:调整容器不被系统OOME掉 true||、
+```
+
