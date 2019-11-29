@@ -481,6 +481,6 @@ c3b5f37cacce        mynet               bridge              local
 		 0: 未设置(unset)
 		 unset: swap空间等于 2 * M
 		 正数：如果swap与RAM都为正数，swap=swap-ram，如果两个值相等swap则无效
---oom-kill-disable:调整容器不被系统OOME掉 true||、
+--oom-kill-disable:禁用系统出现OOM时不杀掉容器
 ```
 
