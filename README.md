@@ -472,8 +472,7 @@ c3b5f37cacce        mynet               bridge              local
 **常用参数**：
 ```
 --cpus:
---cpu-shares:
---cpuset-cpus
+--cpuset-cpus:
 
 --m: 限制容器使用最大内存单位：k、b、m、g
 --memory-swap: 设置容器swap大小，RAM是正数的前提下，如果swap设置为：
@@ -482,5 +481,7 @@ c3b5f37cacce        mynet               bridge              local
 		 unset: swap空间等于 2 * M
 		 正数：如果swap与RAM都为正数，swap=swap-ram，如果两个值相等swap则无效
 --oom-kill-disable:禁用系统出现OOM时不杀掉容器
+
 ```
+
 
