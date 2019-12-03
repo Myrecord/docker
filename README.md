@@ -473,6 +473,7 @@ c3b5f37cacce        mynet               bridge              local
 ```
 --cpus: 限制容器使用cpu多少核心
 --cpuset-cpus: 限制容器使用在某个特定的cpu核心上
+--cpu-shares: 限制cpu使用比例默认为1024
 
 --m: 限制容器使用最大内存单位：k、b、m、g
 --memory-swap: 设置容器swap大小，RAM是正数的前提下，如果swap设置为：
