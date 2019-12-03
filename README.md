@@ -471,8 +471,8 @@ c3b5f37cacce        mynet               bridge              local
 
 **常用参数**：
 ```
---cpus:
---cpuset-cpus:
+--cpus: 限制容器使用cpu多少核心
+--cpuset-cpus: 限制容器使用在某个特定的cpu核心上
 
 --m: 限制容器使用最大内存单位：k、b、m、g
 --memory-swap: 设置容器swap大小，RAM是正数的前提下，如果swap设置为：
@@ -482,6 +482,18 @@ c3b5f37cacce        mynet               bridge              local
 		 正数：如果swap与RAM都为正数，swap=swap-ram，如果两个值相等swap则无效
 --oom-kill-disable:禁用系统出现OOM时不杀掉容器
 
+```
+使用`docker stats`动态查看容器使用资源，例:
+``` 
+docker run -ti -m 256M --name test --rm busybox:latest  #限制内存使用256M
+
+CONTAINER ID  NAME  CPU %  MEM USAGE / LIMIT   MEM %  NET I/O  BLOCK I/O  PIDS  #在LIMIT显示最大可用内容
+dc57a0fca56c  test  0.00%  1.289MiB / 256MiB   0.50%  0B / 0B   0B / 0B   1   
+ 
+docker run -ti -m 256M --oom-kill-disable --name test --rm busybox:latest  #禁用系统oom
+
+docker run -ti -m 256M  --cpuset-cpus 0,1 --name test --rm busybox:latest #限制容器使用指定CPU核心
+ 
 ```
 
 
