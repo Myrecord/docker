@@ -1,4 +1,4 @@
-#### 一. docker概念与使用
+#### 一. docker
    [1. 容器与虚拟机有什么区别?](https://github.com/Myrecord/Docker/blob/master/README.md)
   
    [2. docker架构如何工作？](https://github.com/Myrecord/Docker/blob/master/README.md)
@@ -14,7 +14,7 @@
    [7. 网络模型](https://github.com/Myrecord/Docker/blob/master/README.md)
     
    [8. 管理容器资源](https://github.com/Myrecord/Docker/blob/master/README.md)
-#### 二. docker-compose
+   
 ----
 
 #### 一. docker概念与使用
